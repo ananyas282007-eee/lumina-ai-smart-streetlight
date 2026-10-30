@@ -1,95 +1,83 @@
-# LUMINA AI — Smart Streetlight Energy Optimisation
+# LUMINA AI
 
-A hardware-free software prototype for an AI-assisted smart streetlight system. It simulates ambient light, motion, traffic and time, predicts a suitable dimming level, and estimates energy use against a fixed-brightness baseline.
+**AI-Based Smart Streetlight Energy Optimisation System** — a software-only prototype that simulates streetlight sensors, predicts recommended brightness, and visualises energy use in a live dashboard.
 
-> **Prototype note:** Sensor values and energy figures are simulated. The first model is trained on synthetic data and is not a substitute for field calibration, road-lighting standards, or safety validation.
+> **Prototype notice:** Sensor readings and streetlight activity are simulated. This project does not connect to physical LDR/PIR sensors, Arduino, ESP32, or streetlight hardware.
 
 ## Features
-- Simulated streetlight nodes and sensor readings
-- Random Forest brightness recommendation model
-- Motion-aware brightness override
-- Estimated energy use and savings versus a fixed 100% baseline
-- React dashboard with live polling and manual simulation controls
 
-## Requirements
-- Python 3.10+
-- Node.js 18+ (includes npm)
+- FastAPI backend for node, sensor, energy, prediction, and simulation data
+- React and Vite dashboard with charts, node status, sensor readings, and AI insights
+- Random Forest brightness recommendations with safety rules applied to the simulation
+- Windows setup and startup scripts
+- Included trained model artifacts and a prebuilt frontend bundle
 
-## Run on Windows
-
-### 1. Start the backend
-Open PowerShell in this project folder:
-
-```powershell
-cd backend
-py -m venv .venv
-.\.venv\Scripts\Activate.ps1
-pip install -r requirements.txt
-py train_model.py
-py -m uvicorn app:app --reload --port 8000
-```
-
-If PowerShell blocks activation, run:
-```powershell
-Set-ExecutionPolicy -Scope Process -ExecutionPolicy Bypass
-.\.venv\Scripts\Activate.ps1
-```
-
-Backend API: http://127.0.0.1:8000  
-API docs: http://127.0.0.1:8000/docs
-
-### 2. Start the frontend
-Open a **second** PowerShell window in the project folder:
-
-```powershell
-cd frontend
-npm install
-npm run dev
-```
-
-Open the local URL printed by Vite, usually http://localhost:5173.
-
-## Project structure
+## Project layout
 
 ```text
-lumina-ai/
-├── backend/
-│   ├── app.py
-│   ├── ai_model.py
-│   ├── simulator.py
-│   ├── train_model.py
-│   └── requirements.txt
-├── frontend/
-│   ├── index.html
-│   ├── package.json
-│   └── src/
-│       ├── App.jsx
-│       ├── main.jsx
-│       └── style.css
-├── .gitignore
-├── LICENSE
-└── README.md
+backend/                 FastAPI API, simulator, model code, and trained artifacts
+frontend/src/             React dashboard source
+frontend/dist/            Prebuilt dashboard bundle
+setup.bat                 Windows setup helper
 ```
 
-## Model inputs
-- `ambient_lux`: simulated ambient light level
-- `motion`: whether movement is detected
-- `traffic`: simulated traffic density from 0 to 1
-- `hour`: hour of day from 0 to 23
+## Quick start (Windows)
 
-The initial model predicts a brightness percentage. A controller then applies a daytime-off rule, a minimum night-time level and a motion override.
+### Automated setup
 
-## Energy estimate
-The prototype assumes one 100 W equivalent LED lamp per node and uses:
-`energy_kwh = rated_power_kw × brightness_fraction × elapsed_hours × node_count`.
+Run `setup.bat` from the project folder. It creates the Python environment and installs backend and frontend dependencies.
 
-The baseline assumes every lamp runs at 100% for the same elapsed period. Savings are estimates within this simulation only.
+### Manual setup
 
-## Next milestones
-1. Validate and improve the simulator and dashboard.
-2. Add CSV logging, model evaluation and explainable AI outputs.
-3. Add an optional MQTT/ESP32 integration layer when hardware is available.
-4. Document test cases and publish screenshots/demo on GitHub.
+1. Install Python 3 and Node.js (npm included).
+2. In a terminal, install and start the backend:
+
+   ```powershell
+   cd backend
+   py -3 -m venv venv
+   .\venv\Scripts\Activate.ps1
+   pip install -r requirements.txt
+   uvicorn main:app --host 127.0.0.1 --port 8000 --reload
+   ```
+
+3. In a second terminal, install and start the frontend:
+
+   ```powershell
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+4. Open the dashboard at <http://localhost:5173>.
+
+The API documentation is available at <http://localhost:8000/docs>, and the health endpoint is <http://localhost:8000/api/health>.
+
+## API overview
+
+| Method | Endpoint | Purpose |
+| --- | --- | --- |
+| `GET` | `/api/health` | Service health |
+| `GET` | `/api/dashboard` | Dashboard summary |
+| `GET` | `/api/nodes` | All simulated streetlight nodes |
+| `GET` | `/api/nodes/{node_id}` | One node |
+| `GET` | `/api/sensors` | Sensor readings |
+| `GET` | `/api/predictions` | Brightness predictions |
+| `GET` | `/api/energy` | Energy estimates |
+| `GET` | `/api/model/info` | Model details |
+| `POST` | `/api/simulation/update` | Advance the simulation |
+| `POST` | `/api/simulation/train` | Train the model |
+
+## Model and simulation
+
+The backend uses a Scikit-learn Random Forest Regressor. It consumes simulated ambient light, motion, traffic, and time features to recommend brightness from 0–100%. Safety rules adjust recommendations for daylight, nighttime minimum brightness, detected motion, and traffic conditions. Energy figures are estimates for the simulated lights, not measurements from deployed equipment.
+
+## Tech stack
+
+- **Backend:** Python, FastAPI, Uvicorn, NumPy, Pandas, Scikit-learn, Joblib
+- **Frontend:** React, Vite, Recharts, Axios
+
+See `backend/requirements.txt` and `frontend/package.json` for dependency details.
 
 ## License
-MIT — see `LICENSE`.
+
+This project is distributed under the MIT License. See [LICENSE](LICENSE).

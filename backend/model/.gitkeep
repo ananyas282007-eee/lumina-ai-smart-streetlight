@@ -1,0 +1,4 @@
+# LUMINA AI – Backend Model Directory
+# This folder is created automatically when the AI model is trained.
+# Contents: rf_model.joblib  (trained Random Forest model)
+#           feature_info.joblib  (feature column list)
